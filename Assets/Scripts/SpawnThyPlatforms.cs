@@ -60,9 +60,8 @@ public class SpawnThyPlatforms : MonoBehaviour
 
     private void Update()
     {
-        if(player.transform.position.y - platformQueue.Peek().transform.position.y > 10)
+        if (player.transform.position.y - lastSpawnPos.y > 2)
         {
-            CheckAndDespawnPlatform();
             SpawnPlatforms();
         }
     }
