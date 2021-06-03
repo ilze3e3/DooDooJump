@@ -50,17 +50,27 @@ public class SpawnThyPlatforms : MonoBehaviour
     {
         Vector2 startLoc = player.transform.position;
 
-        rWX = rightWall.transform.position.x - (rightWall.transform.localScale.x / 2) + disBetweenPlatformAndWall;
-        lWX = leftWall.transform.position.x + (rightWall.transform.localScale.x / 2) + disBetweenPlatformAndWall;
+        rWX = rightWall.transform.position.x - (rightWall.transform.localScale.x / 2) - disBetweenPlatformAndWall - normalPlatform.transform.localScale.x / 2;
+        lWX = leftWall.transform.position.x + (rightWall.transform.localScale.x / 2) + disBetweenPlatformAndWall + normalPlatform.transform.localScale.x / 2;
 
         platformQueue = new Queue<GameObject>();
 
         SpawnPlatforms();
     }
 
-    void SpawnPlatforms()
+    private void Update()
+    {
+        if(player.transform.position.y - platformQueue.Peek().transform.position.y > 10)
+        {
+            CheckAndDespawnPlatform();
+            SpawnPlatforms();
+        }
+    }
+
+    public void SpawnPlatforms()
     {
         int numPlatform = UnityEngine.Random.Range(1, maxNumOfPlatformPerLevel);
+        
         if(gameStart)
         {
 
@@ -69,17 +79,40 @@ public class SpawnThyPlatforms : MonoBehaviour
             platformQueue.Enqueue(Instantiate(startingPlatform, spawnLoc, new Quaternion()));
             lastSpawnPos = spawnLoc;
 
-            for(int i = 0; i < numPlatformLevelAtStart; i++)
+
+
+            spawnLoc = new Vector2(UnityEngine.Random.Range(rWX, lWX), lastSpawnPos.y + 1 +  UnityEngine.Random.Range(1, maxDistanceBetweenPlatform));
+
+            var tmp = UnityEngine.Random.Range(0, 1);
+
+            if (tmp - 1 < 0.5)
+            {
+                platformQueue.Enqueue(Instantiate(normalPlatform, spawnLoc, new Quaternion()));
+            }
+            else
+            {
+                platformQueue.Enqueue(Instantiate(snappyPlatform, spawnLoc, new Quaternion()));
+            }
+
+            lastSpawnPos = spawnLoc;
+
+            for (int i = 0; i < numPlatformLevelAtStart - 1; i++)
             {
                 for(int j = 0; j < numPlatform; j++) 
                 {
-                    spawnLoc = new Vector2(UnityEngine.Random.Range(rWX, lWX), lastSpawnPos.y + UnityEngine.Random.Range(1, maxDistanceBetweenPlatform));
+                    spawnLoc = new Vector2(UnityEngine.Random.Range(rWX, lWX), lastSpawnPos.y + UnityEngine.Random.Range(2, maxDistanceBetweenPlatform));
 
-                    int rand = UnityEngine.Random.Range(0, 1);
+                    tmp = UnityEngine.Random.Range(0, 1);
 
-                    if (rand == 0) platformQueue.Enqueue(Instantiate(normalPlatform, spawnLoc, new Quaternion()));
-                    else if (rand == 1) platformQueue.Enqueue(Instantiate(snappyPlatform, spawnLoc, new Quaternion()));
-                    
+                    if (tmp - 1 < 0.5)
+                    {
+                        platformQueue.Enqueue(Instantiate(normalPlatform, spawnLoc, new Quaternion()));
+                    }
+                    else
+                    {
+                        platformQueue.Enqueue(Instantiate(snappyPlatform, spawnLoc, new Quaternion()));
+                    }
+
                     lastSpawnPos = spawnLoc;
                 }
             }
@@ -90,13 +123,18 @@ public class SpawnThyPlatforms : MonoBehaviour
         {
             for (int j = 0; j < numPlatform; j++)
             {
-                Vector2 spawnLoc = new Vector2(UnityEngine.Random.Range(rWX, lWX), startLoc.y + UnityEngine.Random.Range(1, maxDistanceBetweenPlatform));
+                Vector2 spawnLoc = new Vector2(UnityEngine.Random.Range(rWX, lWX), lastSpawnPos.y + UnityEngine.Random.Range(1, maxDistanceBetweenPlatform));
 
-                int rand = UnityEngine.Random.Range(0, 1);
+                var tmp = UnityEngine.Random.Range(0, 1);
 
-                if (rand == 0) platformQueue.Enqueue(Instantiate(normalPlatform, spawnLoc, new Quaternion()));
-                else if (rand == 1) platformQueue.Enqueue(Instantiate(snappyPlatform, spawnLoc, new Quaternion()));
-
+                if (tmp - 1 < 0.5)
+                {
+                    platformQueue.Enqueue(Instantiate(normalPlatform, spawnLoc, new Quaternion()));
+                }
+                else
+                {
+                    platformQueue.Enqueue(Instantiate(snappyPlatform, spawnLoc, new Quaternion()));
+                }
                 lastSpawnPos = spawnLoc;
              }
             CheckAndDespawnPlatform();
