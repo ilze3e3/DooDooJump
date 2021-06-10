@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using TMPro;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class DooDoo_Jumper : MonoBehaviour
@@ -19,12 +22,45 @@ public class DooDoo_Jumper : MonoBehaviour
     public bool dooDooGoJump = false;
 
     public SpawnThyPlatforms spawner;
-   
+
+    public float score;
+    public float startPos;
+
+    public float highScore;
+
+    #region HUD Components
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI highScoreText;
+    public GameObject deathPanel;
+    public TextMeshProUGUI deathScoreText;
+    public TextMeshProUGUI deathHighScoreText;
+    #endregion
     // Start is called before the first frame update
     void Start()
     {
         rb2D = this.GetComponent<Rigidbody2D>();
         dB = deathBlock.GetComponent<BoxCollider2D>();
+        startPos = this.transform.position.y;
+        string filePath = Application.persistentDataPath + "/save.data";
+
+        if (File.Exists(filePath))
+        {
+            // File exists  
+            FileStream dataStream = new FileStream(filePath, FileMode.Open);
+
+            BinaryFormatter converter = new BinaryFormatter();
+            GameData gD = converter.Deserialize(dataStream) as GameData;
+            highScore = gD.highScore;
+
+            dataStream.Close();
+
+        }
+        else
+        {
+            // File does not exist
+            highScore = 0;
+        }
+        highScoreText.text = "HighScore: " + Mathf.RoundToInt(highScore).ToString();
     }
 
     // Update is called once per frame
@@ -32,11 +68,11 @@ public class DooDoo_Jumper : MonoBehaviour
     {
         if (Input.GetAxis("Horizontal") > 0)
         {
-            rb2D.AddForce(new Vector2(2, 0));
+            rb2D.AddForce(new Vector2(1, 0));
         }
         if (Input.GetAxis("Horizontal") < 0)
         {
-            rb2D.AddForce(new Vector2(-2, 0));
+            rb2D.AddForce(new Vector2(-1, 0));
         }
 
         if (dooDooGoJump)
@@ -51,7 +87,10 @@ public class DooDoo_Jumper : MonoBehaviour
             lW.transform.position = new Vector2(lW.transform.position.x, mc.transform.position.y);
             rW.transform.position = new Vector2(rW.transform.position.x, mc.transform.position.y);
             deathBlock.transform.position = new Vector2(deathBlock.transform.position.x, mc.transform.position.y - 5.3f);
+            score = this.transform.position.y - startPos;
         }
+
+        scoreText.text = "Score: " + Mathf.RoundToInt(score).ToString();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
@@ -93,6 +132,28 @@ public class DooDoo_Jumper : MonoBehaviour
                 break;
             case "Death":
                 /// Player has fallen off of the screen. Make em die. 
+                /// Save Highscore and activated death panel
+                /// 
+
+                if(score > highScore)
+                {
+                    GameData gD = new GameData();
+                    gD.highScore = score;
+
+                    string filePath = Application.persistentDataPath + "/save.data";
+
+                    FileStream dataStream = new FileStream(filePath, FileMode.Create);
+
+                    BinaryFormatter converter = new BinaryFormatter();
+                    converter.Serialize(dataStream, gD);
+
+                    dataStream.Close();
+                }
+
+                deathPanel.SetActive(true);
+                deathScoreText.text = "Score: " + Mathf.RoundToInt(score).ToString();
+                deathHighScoreText.text = "HighScore: " + Mathf.RoundToInt(highScore).ToString();
+
                 break;
         }
     }
