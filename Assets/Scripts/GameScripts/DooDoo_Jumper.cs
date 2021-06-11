@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using UnityEngine.Animations;
 using TMPro;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -27,6 +28,8 @@ public class DooDoo_Jumper : MonoBehaviour
     public float startPos;
 
     public float highScore;
+
+    public Animator charAnimator;
 
     #region HUD Components
     public TextMeshProUGUI scoreText;
@@ -66,6 +69,8 @@ public class DooDoo_Jumper : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        charAnimator.SetFloat("moveDir", Input.GetAxis("Horizontal"));
         if (Input.GetAxis("Horizontal") > 0)
         {
             rb2D.AddForce(new Vector2(1, 0));

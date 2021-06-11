@@ -45,6 +45,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Sprite
+    uniqueID: 2360790621
+    locked: 0
   - name: UI
     uniqueID: 4062822479
     locked: 0
