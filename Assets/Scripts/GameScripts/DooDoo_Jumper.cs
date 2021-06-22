@@ -4,6 +4,8 @@ using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 using TMPro;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -30,6 +32,13 @@ public class DooDoo_Jumper : MonoBehaviour
     public float highScore;
 
     public Animator charAnimator;
+
+    [SerializeField] AudioSource musicAudio;
+    [SerializeField] AudioSource jumpingAudio;
+    [SerializeField] AudioSource gameOverAudio;
+
+    [SerializeField] GameObject pausePanel;
+
 
     #region HUD Components
     public TextMeshProUGUI scoreText;
@@ -70,14 +79,28 @@ public class DooDoo_Jumper : MonoBehaviour
     void Update()
     {
 
+        if(Input.GetKeyDown(KeyCode.Escape) && !deathPanel.activeSelf) 
+        {
+            if(pausePanel.activeSelf)
+            {
+                Time.timeScale = 1;
+                pausePanel.SetActive(false);
+            }
+            else
+            {
+                Time.timeScale = 0;
+                pausePanel.SetActive(true);
+            }
+        }
+
         charAnimator.SetFloat("moveDir", Input.GetAxis("Horizontal"));
         if (Input.GetAxis("Horizontal") > 0)
         {
-            rb2D.AddForce(new Vector2(1, 0));
+            rb2D.AddForce(new Vector2(4, 0));
         }
         if (Input.GetAxis("Horizontal") < 0)
         {
-            rb2D.AddForce(new Vector2(-1, 0));
+            rb2D.AddForce(new Vector2(-4, 0));
         }
 
         if (dooDooGoJump)
@@ -111,6 +134,7 @@ public class DooDoo_Jumper : MonoBehaviour
                     jumpHeight = collision.gameObject.GetComponent<Platform>().OnLand();
                     dooDooGoJump = true;
                     spawner.SpawnPlatforms();
+                    jumpingAudio.Play();
                 }
                 
                 break;
@@ -119,6 +143,7 @@ public class DooDoo_Jumper : MonoBehaviour
                 {
                     jumpHeight = collision.gameObject.GetComponent<Platform>().OnLand();
                     dooDooGoJump = true;
+                    jumpingAudio.Play();
                 }
                 break;
             case "SideWall":
@@ -139,7 +164,7 @@ public class DooDoo_Jumper : MonoBehaviour
                 /// Player has fallen off of the screen. Make em die. 
                 /// Save Highscore and activated death panel
                 /// 
-
+                gameOverAudio.Play();
                 if(score > highScore)
                 {
                     GameData gD = new GameData();
@@ -161,5 +186,15 @@ public class DooDoo_Jumper : MonoBehaviour
 
                 break;
         }
+    }
+
+    public void RestartGame()
+    {
+        SceneManager.LoadSceneAsync(1);
+    }
+
+    public void GoToMainMenu()
+    {
+        SceneManager.LoadSceneAsync(0);
     }
 }
