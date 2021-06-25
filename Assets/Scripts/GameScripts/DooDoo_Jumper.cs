@@ -78,7 +78,7 @@ public class DooDoo_Jumper : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
+        // If <Escape> is pressed, the pause menu appears
         if(Input.GetKeyDown(KeyCode.Escape) && !deathPanel.activeSelf) 
         {
             if(pausePanel.activeSelf)
@@ -139,7 +139,7 @@ public class DooDoo_Jumper : MonoBehaviour
                 
                 break;
             case "StartPlatform":
-                if (collision.relativeVelocity.magnitude >= 0) // TODO: test whether magnitude needs to be negative or positive
+                if (collision.relativeVelocity.magnitude >= 0)
                 {
                     jumpHeight = collision.gameObject.GetComponent<Platform>().OnLand();
                     dooDooGoJump = true;
